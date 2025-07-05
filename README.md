@@ -23,7 +23,7 @@ Add the package to your `pubspec.yaml` file:
 dependencies:
   # mdsoft_google_map_user_pick_location_from_scroll : ^<latest_version>  
   mdsoft_google_map_user_pick_location_from_scroll :
-   git: 'https://github.com/Salah3mer/google_map_routing_user_pick_location.git' 
+   git: 'https://github.com/Salah3mer/google_map_routing_user_pick_location_from_scrool.git' 
   
 ```
 
