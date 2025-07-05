@@ -139,10 +139,10 @@ void main() async {
 
 ### Implementing the Location Picker
 
-To use the location picker in your app, include the `MdSoftGoogleMapUserPickLocation` widget in your widget tree:
+To use the location picker in your app, include the `MdSoftGoogleMapUserPickLocationFromScroll` widget in your widget tree:
 
 ```dart
-MdSoftGoogleMapUserPickLocation(
+MdSoftGoogleMapUserPickLocationFromScroll(
   isUser: true, // Set to true for user mode, false for driver mode
   mapStyle: 'assets/json/map_style.json', // Path to your custom map style JSON file (optional)
   
