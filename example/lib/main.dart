@@ -76,10 +76,8 @@ class MapScreen extends StatelessWidget {
         mapStyle: 'assets/json/map_style.json',
         startLocation:
             const LatLng(35.1772740409823, 45.98494988507281), // San Francisco
-        floatingActionButtonIcon:
-            const Icon(Icons.my_location, color: Colors.black),
         selectedPlace: (val) {
-          log('selectedStartLocationLatLng Place: ${val.selectedLocation}');
+          log('selectedLocation Place: ${val.selectedLocation}');
           log('pointName Place: ${val.pointName}');
         },
         internal: true,

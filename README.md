@@ -149,22 +149,14 @@ MdSoftGoogleMapUserPickLocation(
   internal: false, // added if  you wont to make it internal or not
   startLocation:
             const LatLng(35.1772740409823, 45.98494988507281),
-  selectedPlace: (MdOnUserSelectedPlace selectedPlaces) {
-    // This callback gives you access to the locations selected by the user
-    
-    // Access the starting location
-    LatLng startPoint = selectedPlaces.selectedStartLocationLatLng;
-    
-    // Access the list of destination locations (can be multiple waypoints)
-    List<LatLng> destinations = selectedPlaces.selectedEndLocationLatLng;
-    
-    // Access the names of all points (starting point + destinations)
-    List<String> locationNames = selectedPlaces.pointsName;
-    
-    // Now you can use these values to build your navigation or routing logic
-    print('Starting from: ${locationNames[0]} at $startPoint');
-    print('Going to: ${destinations.length} destinations');
-  },
+  selectedPlace: (val) {
+       /// on tap it give you the selectedLocation LatLang
+        log('selectedLocation Place: ${val.selectedLocation}');
+       ///  give you the selectedLocation  point name
+        log('pointName Place: ${val.pointName}');
+
+        },
+        internal: true,
 ),
 ```
 

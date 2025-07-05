@@ -10,6 +10,7 @@ import 'package:mdsoft_google_map_user_pick_location_from_scroll/src/api/dio_cli
 import 'package:mdsoft_google_map_user_pick_location_from_scroll/src/models/geometry/geometry.dart';
 import 'package:mdsoft_google_map_user_pick_location_from_scroll/src/models/place_details_model/place_details_model.dart';
 import 'package:mdsoft_google_map_user_pick_location_from_scroll/src/models/places_model/prediction.dart';
+import 'package:mdsoft_google_map_user_pick_location_from_scroll/src/repositories/google_map_repo.dart';
 import 'package:mdsoft_google_map_user_pick_location_from_scroll/src/utils/extension.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -19,7 +20,7 @@ part 'google_map_state.dart';
 class GoogleMapCubit extends Cubit<GoogleMapState> {
   GoogleMapCubit() : super(GoogleMapInitial());
   GoogleMapController? googleMapController;
-  GoogleMapRepoImpl googleMapRepoImpl =
+  GoogleMapRepo googleMapRepoImpl =
       GoogleMapRepoImpl(dioClient: DioClient(Dio()));
   LocationService locationService = LocationService();
   FocusNode searchFocusNode = FocusNode();

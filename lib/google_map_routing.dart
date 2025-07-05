@@ -18,7 +18,6 @@ export '../src/utils/constants.dart';
 export '../src/utils/app_images.dart';
 
 class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
-  final Widget? floatingActionButtonIcon;
   final String? mapStyle;
   final bool isUser;
   final LatLng? startLocation;
@@ -28,7 +27,6 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
   const MdSoftGoogleMapUserPickLocationFromScroll({
     super.key,
     this.startLocation,
-    this.floatingActionButtonIcon,
     this.mapStyle,
     this.isUser = false,
     required this.internal,
