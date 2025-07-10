@@ -119,7 +119,6 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
       ];
       final fullAddress =
           parts.where((e) => e != null && e.trim().isNotEmpty).join(' - ');
-
       locationName = fullAddress;
       searchController.text = locationName!;
     }).catchError((error) {
@@ -191,6 +190,12 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
       emit(GetPlaceDetailsErrorState(errorMessage: l.message));
     }, (r) async {
       if (internal) {
+        if (regionModel == null) {
+          emit(GetPlaceDetailsErrorState(
+              errorMessage: 'الرجاء الانتظار لتحميل بيانات المنطقة'));
+          return;
+        }
+
         bool inside = chackInternalOrNot(LatLng(
             r.result!.geometry!.location!.lat!,
             r.result!.geometry!.location!.lng!));
@@ -209,20 +214,30 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
   }
 
   bool chackInternalOrNot(LatLng r) {
+    if (regionModel == null) {
+      debugPrint('chackInternalOrNot: regionModel is null');
+      return false;
+    }
+
     bool isPointInPolygon(mp.LatLng point, List<mp.LatLng> polygon) {
       return mp.PolygonUtil.containsLocation(point, polygon, true);
     }
 
     mp.LatLng userPoint = mp.LatLng(r.latitude, r.longitude);
 
-    bool inside = isPointInPolygon(
-        userPoint,
-        convertToGoogleLatLng(
-          regionModel!.geometry.coordinates[0]
-              .map((e) => LatLng(e[1], e[0]))
-              .toList(),
-        ));
-    return inside;
+    try {
+      bool inside = isPointInPolygon(
+          userPoint,
+          convertToGoogleLatLng(
+            regionModel!.geometry.coordinates[0]
+                .map((e) => LatLng(e[1], e[0]))
+                .toList(),
+          ));
+      return inside;
+    } catch (e) {
+      debugPrint('Error in chackInternalOrNot: $e');
+      return false;
+    }
   }
 
   void _onSearchAdd(PlaceDetailsModel r) async {

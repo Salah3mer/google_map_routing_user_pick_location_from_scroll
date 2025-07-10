@@ -141,7 +141,7 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
                             if (inSide) {
                               selectedPlace.call(MdOnUserSelectedPlace(
                                 selectedLocation: cubit.selectedLocation!,
-                                pointName: cubit.locationName!,
+                                pointName: cubit.locationName ?? '',
                               ));
                             } else {
                               showToastificationWidget(
@@ -152,7 +152,7 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
                           } else {
                             selectedPlace.call(MdOnUserSelectedPlace(
                               selectedLocation: cubit.selectedLocation!,
-                              pointName: cubit.locationName!,
+                              pointName: cubit.locationName ?? '',
                             ));
                           }
                         },
@@ -355,6 +355,14 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
           widget.cubit.selectedLocation = location;
         });
         if (widget.internal) {
+          if (widget.cubit.regionModel == null) {
+            showToastificationWidget(
+              message: 'الرجاء الانتظار لتحميل بيانات المنطقة',
+              context: context,
+            );
+            return;
+          }
+
           bool inSide = widget.cubit.chackInternalOrNot(location);
           if (inSide) {
             widget.cubit.selectedPlaceName(location);
