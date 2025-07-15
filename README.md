@@ -145,7 +145,8 @@ To use the location picker in your app, include the `MdSoftGoogleMapUserPickLoca
 MdSoftGoogleMapUserPickLocationFromScroll(
   isUser: true, // Set to true for user mode, false for driver mode
   mapStyle: 'assets/json/map_style.json', // Path to your custom map style JSON file (optional)
-  
+  isStart: false, /// for chinging pin 
+
   internal: false, // added if  you wont to make it internal or not
   startLocation:
             const LatLng(35.1772740409823, 45.98494988507281),
@@ -156,7 +157,6 @@ MdSoftGoogleMapUserPickLocationFromScroll(
         log('pointName Place: ${val.pointName}');
 
         },
-        internal: true,
 ),
 ```
 

@@ -34,6 +34,7 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
   Set<Marker> markers = {};
   Set<Polyline> polyLines = {};
   late LatLng currentLocation;
+  LatLng? currentLocationLatLang;
   LatLng? carLocation;
 
 //? getLocation
@@ -43,6 +44,11 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
       emit(GetCurrentLocationLoadingState());
       Future.delayed(const Duration(seconds: 5));
       LocationData locationData = await locationService.getLocation();
+      currentLocationLatLang = LatLng(
+        locationData.latitude!,
+        locationData.longitude!,
+      );
+
       currentLocation = startLocation ??
           LatLng(locationData.latitude!, locationData.longitude!);
       var myCameraPosition = CameraPosition(target: currentLocation, zoom: 17);
@@ -51,7 +57,6 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
           myCameraPosition,
         ),
       );
-
       updateCurrentLocationMarker();
       selectedLocation = currentLocation;
       selectedPlaceName(currentLocation);
@@ -133,7 +138,7 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
     markers.add(
       Marker(
         markerId: const MarkerId('currentLocation'),
-        position: currentLocation,
+        position: currentLocationLatLang!,
         icon: await AppImages.currentLocation
             .toBitmapDescriptor(devicePixelRatio: 2.5),
       ),

@@ -22,6 +22,8 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
   final bool isUser;
   final LatLng? startLocation;
   final bool internal;
+  final bool isStart;
+
   final void Function(MdOnUserSelectedPlace) selectedPlace;
 
   const MdSoftGoogleMapUserPickLocationFromScroll({
@@ -31,6 +33,7 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
     this.isUser = false,
     required this.internal,
     required this.selectedPlace,
+    this.isStart = true,
   });
 
   @override
@@ -96,7 +99,8 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
                       ),
                     ),
                     Center(
-                      child: Image.asset(AppImages.point),
+                      child: Image.asset(
+                          isStart ? AppImages.point : AppImages.endLocation),
                     ),
                     Positioned.fill(
                       top: 80,
@@ -189,7 +193,7 @@ class UserFloatingActionButton extends StatelessWidget {
       onPressed: () {
         cubit.googleMapController?.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
-            target: cubit.currentLocation,
+            target: cubit.currentLocationLatLang!,
             zoom: 16,
           ),
         ));
@@ -356,10 +360,10 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
         });
         if (widget.internal) {
           if (widget.cubit.regionModel == null) {
-            showToastificationWidget(
-              message: 'الرجاء الانتظار لتحميل بيانات المنطقة',
-              context: context,
-            );
+            // showToastificationWidget(
+            //   message: 'الرجاء الانتظار لتحميل بيانات المنطقة',
+            //   context: context,
+            // );
             return;
           }
 
