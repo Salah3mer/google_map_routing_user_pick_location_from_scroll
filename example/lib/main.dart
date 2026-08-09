@@ -73,7 +73,7 @@ class MapScreen extends StatelessWidget {
       body: MdSoftGoogleMapUserPickLocationFromScroll(
         isUser: true,
         mapStyle: 'assets/json/map_style.json',
-        isStart: false,
+        isStart: true,
         startLocation:
             const LatLng(35.1772740409823, 45.98494988507281), // San Francisco
         selectedPlace: (val) {
@@ -81,6 +81,9 @@ class MapScreen extends StatelessWidget {
           log('pointName Place: ${val.pointName}');
         },
         internal: false,
+        oldLocation:
+            const LatLng(35.1772740409823, 45.98494988507281),
+             // San Francisco
       ),
     );
   }
@@ -91,17 +94,17 @@ Future<bool> requestLocationPermissions() async {
   PermissionStatus foregroundStatus =
       await Permission.locationWhenInUse.request();
   if (!foregroundStatus.isGranted) {
-    print("Foreground location permission denied");
+    log("Foreground location permission denied");
     return false;
   }
 
   // Then request background location permission.
   PermissionStatus backgroundStatus = await Permission.locationAlways.request();
   if (!backgroundStatus.isGranted) {
-    print("Background location permission denied");
+    log("Background location permission denied");
     return false;
   }
 
-  print("Both foreground and background location permissions granted");
+  log("Both foreground and background location permissions granted");
   return true;
 }

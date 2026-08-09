@@ -23,6 +23,7 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
   final LatLng? startLocation;
   final bool internal;
   final bool isStart;
+  final LatLng? oldLocation;
 
   final void Function(MdOnUserSelectedPlace) selectedPlace;
 
@@ -34,6 +35,7 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
     required this.internal,
     required this.selectedPlace,
     this.isStart = true,
+    this.oldLocation,
   });
 
   @override
@@ -88,6 +90,8 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
                       isUser: isUser,
                       cubit: cubit,
                       mapStyle: mapStyle,
+                      isStart: isStart,
+                      oldLocation: oldLocation,
                     ),
                     Padding(
                       padding:
@@ -107,17 +111,19 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
                       right: 16,
                       child: Align(
                         alignment: Alignment.topRight,
-                        child: Container(
+                        child: SizedBox(
                           width: width / 1.2,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.9),
+                          child: Material(
+                            color: Colors.white.withValues(alpha: 0.9),
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(16),
                               topRight: Radius.circular(16),
                             ),
-                          ),
-                          child: PlacesListWidget(
-                            internal: internal,
+                            clipBehavior: Clip.antiAlias,
+                            child: PlacesListWidget(
+                              internal: internal,
+                              isStart: isStart,
+                            ),
                           ),
                         ),
                       ),
@@ -149,15 +155,33 @@ class MdSoftGoogleMapUserPickLocationFromScroll extends StatelessWidget {
                               ));
                             } else {
                               showToastificationWidget(
-                                message: 'المكان خارج الحدود المسموح بها',
+                                message:
+                                    'يرجى اختيار موقع داخل الحدود المحددة، حيث أن هذه رحلة داخلية',
                                 context: context,
                               );
                             }
                           } else {
-                            selectedPlace.call(MdOnUserSelectedPlace(
-                              selectedLocation: cubit.selectedLocation!,
-                              pointName: cubit.locationName ?? '',
-                            ));
+                            if (isStart) {
+                              selectedPlace.call(MdOnUserSelectedPlace(
+                                selectedLocation: cubit.selectedLocation!,
+                                pointName: cubit.locationName ?? '',
+                              ));
+                              return;
+                            }
+                            bool inSide = cubit
+                                .chackInternalOrNot(cubit.selectedLocation!);
+                            if (inSide) {
+                              showToastificationWidget(
+                                message:
+                                    'يرجى اختيار موقع خارج الحدود المحددة، حيث أن هذه رحلة خارجية',
+                                context: context,
+                              );
+                            } else {
+                              selectedPlace.call(MdOnUserSelectedPlace(
+                                selectedLocation: cubit.selectedLocation!,
+                                pointName: cubit.locationName ?? '',
+                              ));
+                            }
                           }
                         },
                         text: 'تثبيت النقطة'),
@@ -268,9 +292,11 @@ class SearchTextFormFeild extends StatelessWidget {
 
 class PlacesListWidget extends StatelessWidget {
   final bool internal;
+  final bool isStart;
   const PlacesListWidget({
     super.key,
     required this.internal,
+    required this.isStart,
   });
   @override
   Widget build(BuildContext context) {
@@ -280,30 +306,34 @@ class PlacesListWidget extends StatelessWidget {
         return ListView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
-            itemBuilder: (context, index) => ListTile(
-                  onTap: () async {
-                    await cubit.getPlaceDetails(
-                        placeId: cubit.predictions[index].placeId!,
-                        internal: internal);
-                    if (context.mounted) {
-                      FocusScope.of(context).unfocus();
-                    }
-                  },
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                  ),
-                  leading: SvgPicture.asset(
-                    AppImages.clock,
-                    height: 20,
-                    width: 20,
-                    fit: BoxFit.scaleDown,
-                  ),
-                  title: Text(cubit.predictions[index].description!),
-                  trailing: SvgPicture.asset(
-                    AppImages.frame,
-                    height: 20,
-                    width: 20,
-                    fit: BoxFit.scaleDown,
+            itemBuilder: (context, index) => Material(
+                  type: MaterialType.transparency,
+                  child: ListTile(
+                    onTap: () async {
+                      await cubit.getPlaceDetails(
+                          placeId: cubit.predictions[index].placeId!,
+                          internal: internal,
+                          isStart: isStart);
+                      if (context.mounted) {
+                        FocusScope.of(context).unfocus();
+                      }
+                    },
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                    ),
+                    leading: SvgPicture.asset(
+                      AppImages.clock,
+                      height: 20,
+                      width: 20,
+                      fit: BoxFit.scaleDown,
+                    ),
+                    title: Text(cubit.predictions[index].description!),
+                    trailing: SvgPicture.asset(
+                      AppImages.frame,
+                      height: 20,
+                      width: 20,
+                      fit: BoxFit.scaleDown,
+                    ),
                   ),
                 ),
             itemCount: cubit.predictions.length);
@@ -320,19 +350,22 @@ class GoogleMapWidget extends StatefulWidget {
     required this.isUser,
     required this.startLocation,
     required this.internal,
+    this.isStart = true,
+    this.oldLocation,
   });
   final bool isUser;
   final bool internal;
   final GoogleMapCubit cubit;
   final String? mapStyle;
   final LatLng? startLocation;
+  final bool isStart;
+  final LatLng? oldLocation;
 
   @override
   State<GoogleMapWidget> createState() => _GoogleMapWidgetState();
 }
 
 class _GoogleMapWidgetState extends State<GoogleMapWidget> {
-  bool _isCameraMoving = false;
   LatLng location = const LatLng(35.27088501447092, 46.055900529026985);
 
   @override
@@ -349,13 +382,11 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
       myLocationEnabled: false,
       onCameraMove: (position) {
         setState(() {
-          _isCameraMoving = true;
           location = position.target;
         });
       },
       onCameraIdle: () {
         setState(() {
-          _isCameraMoving = false;
           widget.cubit.selectedLocation = location;
         });
         if (widget.internal) {
@@ -372,12 +403,29 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
             widget.cubit.selectedPlaceName(location);
           } else {
             showToastificationWidget(
-              message: 'المكان خارج الحدود المسموح بها',
+              message:
+                  'يرجى اختيار موقع داخل الحدود المحددة، حيث أن هذه رحلة داخلية',
               context: context,
             );
           }
         } else {
-          widget.cubit.selectedPlaceName(location);
+          if (widget.isStart) {
+            widget.cubit.selectedPlaceName(location);
+            return;
+          }
+          if (widget.cubit.regionModel == null) {
+            return;
+          }
+          bool inSide = widget.cubit.chackInternalOrNot(location);
+          if (inSide) {
+            showToastificationWidget(
+              message:
+                  'يرجى اختيار موقع خارج الحدود المحددة، حيث أن هذه رحلة خارجية',
+              context: context,
+            );
+          } else {
+            widget.cubit.selectedPlaceName(location);
+          }
         }
       },
       onMapCreated: (GoogleMapController controller) async {
@@ -386,9 +434,16 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
 
         await widget.cubit.getLocationMyCurrentLocation(
           startLocation: widget.startLocation,
+          isStart: widget.isStart,
+          internal: widget.internal,
+          oldLocation: widget.oldLocation,
         );
-        if (widget.cubit.regionModel == null && widget.internal) {
-          await widget.cubit.getGovernorates(internal: widget.internal);
+        if (widget.cubit.regionModel == null) {
+          await widget.cubit.getGovernorates(
+            startLocation: widget.startLocation,
+            internal: widget.internal,
+            isStart: widget.isStart,
+          );
         }
       },
     );
